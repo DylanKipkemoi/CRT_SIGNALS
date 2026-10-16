@@ -11,7 +11,8 @@ from django.core.exceptions import ImproperlyConfigured
 from dotenv import load_dotenv
 
 BASE_DIR = Path(__file__).resolve().parent.parent
-load_dotenv(BASE_DIR / ".env")
+ENV_FILE = BASE_DIR / ".env"
+load_dotenv(ENV_FILE)
 
 
 def env(name, default=None):
@@ -40,7 +41,10 @@ if not SECRET_KEY:
     if DEBUG:
         SECRET_KEY = "dev-only-insecure-key-change-me"
     else:
-        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is false.")
+        hint = "" if ENV_FILE.exists() else (
+            f" No .env file found at {ENV_FILE}: copy .env.example to .env (it enables DEBUG for local development)."
+        )
+        raise ImproperlyConfigured("DJANGO_SECRET_KEY must be set when DJANGO_DEBUG is false." + hint)
 
 ALLOWED_HOSTS = env_list("DJANGO_ALLOWED_HOSTS", "localhost,127.0.0.1")
 CSRF_TRUSTED_ORIGINS = env_list("DJANGO_CSRF_TRUSTED_ORIGINS", "")
