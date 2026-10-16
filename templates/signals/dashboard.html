@@ -1,0 +1,27 @@
+{% extends "base.html" %}{% block title %}Dashboard{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">Dashboard</h1>
+  <span class="small {% if health.healthy %}text-success{% else %}text-warning{% endif %}">Scanner: {{ health.label }}{% if health.last %} · last run {{ health.last.started_at|date:"H:i" }}{% endif %}</span>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-lg-4">{% include "includes/access_panel.html" %}</div>
+  {% for card in cards %}<div class="col-md-6 col-lg-4">{% include "includes/instrument_card.html" %}</div>{% endfor %}
+</div>
+<div class="card app-card mb-4"><div class="card-body">
+  <h2 class="h5">Active signals</h2>
+  {% if rows %}
+  <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+    <thead><tr><th>ID</th><th>Symbol</th><th>Side</th><th>Score</th><th>Status</th><th>Time</th><th>Levels</th><th></th></tr></thead>
+    <tbody>{% for r in rows %}{% include "includes/signal_row.html" with s=r.signal unlocked=r.unlocked %}{% endfor %}</tbody>
+  </table></div>
+  {% else %}<p class="text-body-secondary mb-0">No active A+ setups right now. <strong>No trade</strong> is a valid outcome. The scanner does not force signals.</p>{% endif %}
+</div></div>
+<div class="card app-card mb-4"><div class="card-body">
+  <h2 class="h5">Your signal history</h2>
+  {% if history %}<ul class="list-unstyled mb-0">{% for u in history %}<li class="small py-1 border-bottom border-secondary-subtle"><a href="{% url 'signals:detail' u.signal.pk %}">#{{ u.signal.pk }} {{ u.signal.instrument.symbol }} {{ u.signal.direction }}</a> · {{ u.get_source_display }} · {{ u.created_at|date:"j M H:i" }} · {{ u.signal.get_status_display }}</li>{% endfor %}</ul>
+  {% else %}<p class="small text-body-secondary mb-0">Signals you unlock will appear here.</p>{% endif %}
+</div></div>
+<h2 class="h5">Track record (all published live signals)</h2>
+{% include "includes/stats.html" %}
+{% endblock %}

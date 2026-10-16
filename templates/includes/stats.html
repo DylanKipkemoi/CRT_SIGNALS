@@ -1,0 +1,9 @@
+<div class="row g-3 text-center">
+  <div class="col-6 col-md-2"><div class="stat"><div class="stat-v">{{ stats.total }}</div><div class="stat-l">Published</div></div></div>
+  <div class="col-6 col-md-2"><div class="stat"><div class="stat-v">{{ stats.open }}</div><div class="stat-l">Open</div></div></div>
+  <div class="col-6 col-md-2"><div class="stat"><div class="stat-v">{{ stats.wins }} / {{ stats.losses }}</div><div class="stat-l">TP hit / Stopped</div></div></div>
+  <div class="col-6 col-md-2"><div class="stat"><div class="stat-v">{% if stats.win_rate is not None %}{{ stats.win_rate }}%{% else %}n/a{% endif %}</div><div class="stat-l">Historical hit rate</div></div></div>
+  <div class="col-6 col-md-2"><div class="stat"><div class="stat-v">{% if stats.avg_r is not None %}{{ stats.avg_r }}R{% else %}n/a{% endif %}</div><div class="stat-l">Avg realized R</div></div></div>
+  <div class="col-6 col-md-2"><div class="stat"><div class="stat-v">{{ stats.expired }} / {{ stats.invalidated }}</div><div class="stat-l">Expired / Invalidated</div></div></div>
+</div>
+{% if not stats.total %}<p class="small text-body-secondary mt-2">No live signals have been published yet.</p>{% endif %}

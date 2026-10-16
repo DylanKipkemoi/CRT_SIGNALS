@@ -1,0 +1,12 @@
+<div class="card app-card h-100"><div class="card-body">
+  <h2 class="h6 text-uppercase text-body-secondary">Your access</h2>
+  {% if summary.has_paid_access %}
+    <p class="mb-1"><span class="badge text-bg-success">Paid access active</span></p>
+    <p class="small mb-0">All eligible signals unlocked until <strong>{{ summary.daily_access.expires_at|date:"D j M, H:i" }}</strong> EAT.</p>
+  {% else %}
+    <p class="mb-1">Free signal: <strong>{{ summary.free_remaining }}</strong> of {{ summary.free_allowance }} remaining</p>
+    {% if summary.free_signal %}<p class="small mb-1">Used on <a href="{% url 'signals:detail' summary.free_signal.signal.pk %}">#{{ summary.free_signal.signal.pk }} {{ summary.free_signal.signal.instrument.symbol }}</a> ({{ summary.free_used_at|date:"j M H:i" }})</p>{% endif %}
+    {% if not summary.verified %}<p class="small text-warning mb-2">Verify your email to use the free signal.</p>{% endif %}
+    <a class="btn btn-primary btn-sm" href="{% url 'payments:pay' %}">Unlock today — KSh {{ summary.fee }}</a>
+  {% endif %}
+</div></div>

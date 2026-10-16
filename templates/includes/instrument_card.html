@@ -1,0 +1,21 @@
+{% load ui %}
+<div class="card h-100 app-card">
+  <div class="card-body">
+    <div class="d-flex justify-content-between align-items-start mb-2">
+      <div><h2 class="h5 mb-0">{{ card.instrument.symbol }}</h2><div class="small text-body-secondary">{{ card.instrument.name }}</div></div>
+      {% include "includes/feed_badge.html" with status=card.status %}
+    </div>
+    <div class="display-6 fw-semibold mono">{% if card.status.last_price %}{{ card.status.last_price|price:card.instrument.price_decimals }}{% else %}—{% endif %}</div>
+    {% if card.status.bid and card.status.ask %}<div class="small mono text-body-secondary">Bid {{ card.status.bid|price:card.instrument.price_decimals }} · Ask {{ card.status.ask|price:card.instrument.price_decimals }}</div>{% endif %}
+    <dl class="row small mt-3 mb-0">
+      <dt class="col-5">Provider</dt><dd class="col-7">{{ card.status.provider|default:card.instrument.provider }} <span class="mono">{{ card.status.provider_symbol }}</span></dd>
+      <dt class="col-5">Last update</dt><dd class="col-7">{{ card.status.last_success_at|date:"d M H:i"|default:"—" }}</dd>
+      <dt class="col-5">Volume</dt><dd class="col-7">{{ card.status.get_volume_type_display|default:"—" }}</dd>
+      <dt class="col-5">Order flow</dt><dd class="col-7">{% if card.status.order_flow_available %}Exchange trades + book{% else %}Unavailable for this feed{% endif %}</dd>
+      <dt class="col-5">Analysis</dt><dd class="col-7">{% if card.analysis %}<span class="badge {{ card.analysis.state|direction_badge }}">{{ card.analysis.get_state_display }}</span>{% if card.analysis.best_score is not None %} <span class="mono">{{ card.analysis.best_score }}/100</span>{% endif %}{% else %}—{% endif %}</dd>
+    </dl>
+    {% if card.analysis.summary %}<p class="small text-body-secondary mt-2 mb-0">{{ card.analysis.summary }}</p>{% endif %}
+    {% if card.status.stale_reason and card.status.is_stale %}<p class="small text-warning mt-2 mb-0">{{ card.status.stale_reason }}</p>{% endif %}
+  </div>
+  {% if user.is_authenticated %}<div class="card-footer bg-transparent"><a href="{% url 'signals:instrument' card.instrument.symbol %}" class="small">View {{ card.instrument.symbol }} signals &rarr;</a></div>{% endif %}
+</div>

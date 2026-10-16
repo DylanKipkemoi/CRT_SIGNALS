@@ -1,0 +1,15 @@
+{% extends "base.html" %}{% block title %}Payment history{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Payment history</h1>
+<div class="card app-card"><div class="card-body">
+{% if page.object_list %}
+<div class="table-responsive"><table class="table table-sm align-middle mb-0">
+<thead><tr><th>Date</th><th>Amount</th><th>Phone</th><th>Status</th><th>M-Pesa receipt</th><th>Access day</th></tr></thead><tbody>
+{% for p in page %}<tr><td>{{ p.created_at|date:"j M Y H:i" }}</td><td>KSh {{ p.amount|floatformat:0 }}</td><td class="mono">{{ p.phone_masked }}</td>
+<td><span class="badge pay-{{ p.status }}">{{ p.get_status_display }}</span>{% if not p.is_final %} <a class="small" href="{% url 'payments:status' p.reference %}">track</a>{% endif %}</td>
+<td class="mono">{{ p.mpesa_receipt|default:"—" }}</td><td>{{ p.access_date|date:"j M Y"|default:"—" }}</td></tr>{% endfor %}
+</tbody></table></div>
+{% if page.has_other_pages %}<nav class="mt-2 small">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">&laquo; Newer</a>{% endif %} Page {{ page.number }} / {{ page.paginator.num_pages }} {% if page.has_next %}<a href="?page={{ page.next_page_number }}">Older &raquo;</a>{% endif %}</nav>{% endif %}
+{% else %}<p class="text-body-secondary mb-0">No payments yet.</p>{% endif %}
+</div></div>
+{% endblock %}

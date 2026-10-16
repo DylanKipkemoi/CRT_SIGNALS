@@ -1,0 +1,21 @@
+{% extends "base.html" %}{% block title %}Access status{% endblock %}
+{% block content %}
+<h1 class="h3 mb-3">Subscription &amp; access status</h1>
+<div class="row g-3 mb-4">
+  <div class="col-md-6">{% include "includes/access_panel.html" %}</div>
+  <div class="col-md-6"><div class="card app-card h-100"><div class="card-body small">
+    <h2 class="h6 text-uppercase text-body-secondary">How access works</h2>
+    <ul class="mb-0">
+      <li>Every verified account gets <strong>{{ summary.free_allowance }}</strong> free confirmed A+ signal, one time only. Logging out, refreshing or switching devices does not reset it.</li>
+      <li>After that, <strong>KSh {{ summary.fee }}</strong> unlocks all eligible BTCUSD and XAUUSD signals until the end of that Africa/Nairobi day.</li>
+      <li>Access only starts once M-Pesa confirms the payment. There are no automatic charges.</li>
+    </ul>
+  </div></div></div>
+</div>
+<div class="card app-card"><div class="card-body">
+  <h2 class="h5">Daily access history</h2>
+  {% if accesses %}<div class="table-responsive"><table class="table table-sm mb-0"><thead><tr><th>Date</th><th>Valid from</th><th>Expires</th><th>Source</th><th>State</th></tr></thead><tbody>
+  {% for a in accesses %}<tr><td>{{ a.access_date|date:"D j M Y" }}</td><td>{{ a.starts_at|date:"H:i" }}</td><td>{{ a.expires_at|date:"j M H:i" }}</td><td>{{ a.get_source_display }}</td><td>{% if a.is_active %}<span class="badge text-bg-success">active</span>{% else %}<span class="badge text-bg-secondary">expired</span>{% endif %}</td></tr>{% endfor %}
+  </tbody></table></div>{% else %}<p class="small text-body-secondary mb-0">No paid access yet.</p>{% endif %}
+</div></div>
+{% endblock %}

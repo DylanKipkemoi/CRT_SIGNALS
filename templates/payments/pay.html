@@ -1,0 +1,23 @@
+{% extends "base.html" %}{% block title %}Unlock today's signals{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-6">
+<div class="card app-card"><div class="card-body p-4">
+  <h1 class="h4">Unlock today's signals</h1>
+  {% if summary.has_paid_access %}
+    <div class="alert alert-success">You already have access until {{ summary.daily_access.expires_at|date:"D j M, H:i" }} EAT.</div>
+  {% else %}
+  <p class="text-body-secondary">Pay <strong>KSh {{ fee }}</strong> by M-Pesa to unlock all eligible BTCUSD and XAUUSD signals until the end of today (Africa/Nairobi). This is a one-off payment, not a subscription.</p>
+  <ol class="small">
+    <li>Enter the Safaricom number to be charged.</li>
+    <li>An M-Pesa prompt will appear on that phone. Check the amount and enter your PIN <strong>on the phone</strong>.</li>
+    <li>Access is unlocked automatically once Safaricom confirms the payment.</li>
+  </ol>
+  {% if not user.is_verified %}<div class="alert alert-warning small">Verify your email address before paying.</div>{% endif %}
+  <form method="post" novalidate>{% csrf_token %}{% include "includes/form.html" %}
+    <button class="btn btn-success w-100" {% if not user.is_verified %}disabled{% endif %}>Send M-Pesa prompt for KSh {{ fee }}</button>
+  </form>
+  <p class="small text-body-secondary mt-3 mb-0">We will never ask for your M-Pesa PIN on this website. Signals are analysis, not financial advice. Read the <a href="{% url 'core:risk' %}">risk disclosure</a>.</p>
+  {% endif %}
+</div></div>
+</div></div>
+{% endblock %}
