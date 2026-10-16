@@ -1,0 +1,7 @@
+Hello {{ user.get_short_name }},
+
+Please confirm your email address for {{ site_name }}:
+
+{{ link }}
+
+If you did not create this account, you can ignore this email.

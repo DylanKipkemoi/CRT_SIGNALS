@@ -1,0 +1,38 @@
+{% extends "base.html" %}{% load static %}{% block title %}{{ instrument.symbol }} signals{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">{{ instrument.symbol }} <small class="text-body-secondary fs-6">{{ instrument.name }}</small></h1>
+  {% include "includes/feed_badge.html" %}
+</div>
+<div class="card app-card mb-3"><div class="card-body">
+  <div class="btn-group btn-group-sm mb-2" role="group" aria-label="Timeframe">
+    <button type="button" class="btn btn-outline-light active" data-tf="1h">1H</button>
+    <button type="button" class="btn btn-outline-light" data-tf="15m">15M</button>
+    <button type="button" class="btn btn-outline-light" data-tf="5m">5M</button>
+  </div>
+  <div id="chart" class="chart" data-url="{% url 'signals:chart_data' instrument.symbol %}"></div>
+  <p class="small text-body-secondary mt-2 mb-0">{% if status and not status.is_live %}Chart shows SAMPLE data, not live prices.{% elif status %}Source: {{ status.provider }} ({{ status.provider_symbol }}). {{ status.get_volume_type_display }}.{% else %}No data loaded yet.{% endif %}</p>
+</div></div>
+<div class="row g-3 mb-3">
+  <div class="col-lg-8"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Current analysis</h2>
+    {% if analysis %}<p class="mb-1"><span class="badge {% if analysis.state == 'BUY' %}badge-buy{% elif analysis.state == 'SELL' %}badge-sell{% elif analysis.state == 'WAIT' %}badge-wait{% else %}badge-notrade{% endif %}">{{ analysis.get_state_display }}</span> {% if analysis.bias %}<span class="small">HTF bias: {{ analysis.bias }}</span>{% endif %}</p>
+    <p class="small mb-0">{{ analysis.summary }}</p>
+    {% else %}<p class="small mb-0">Not scanned yet.</p>{% endif %}
+  </div></div></div>
+  <div class="col-lg-4">{% include "includes/access_panel.html" %}</div>
+</div>
+<div class="card app-card mb-3"><div class="card-body">
+  <h2 class="h5">Signal history</h2>
+  {% if rows %}
+  <div class="table-responsive"><table class="table table-sm align-middle mb-0">
+    <thead><tr><th>ID</th><th>Symbol</th><th>Side</th><th>Score</th><th>Status</th><th>Time</th><th>Levels</th><th></th></tr></thead>
+    <tbody>{% for r in rows %}{% include "includes/signal_row.html" with s=r.signal unlocked=r.unlocked %}{% endfor %}</tbody>
+  </table></div>
+  {% if page.has_other_pages %}<nav class="mt-2 small">{% if page.has_previous %}<a href="?page={{ page.previous_page_number }}">&laquo; Newer</a>{% endif %} Page {{ page.number }} / {{ page.paginator.num_pages }} {% if page.has_next %}<a href="?page={{ page.next_page_number }}">Older &raquo;</a>{% endif %}</nav>{% endif %}
+  {% else %}<p class="text-body-secondary mb-0">No {{ instrument.symbol }} signals have been published yet.</p>{% endif %}
+</div></div>
+<h2 class="h5">{{ instrument.symbol }} track record</h2>
+{% include "includes/stats.html" %}
+{% endblock %}
+{% block scripts %}<script src="{% static 'vendor/lightweight-charts/lightweight-charts.standalone.production.js' %}"></script>{% endblock %}

@@ -1,0 +1,18 @@
+{% extends "base.html" %}{% block title %}Profile{% endblock %}
+{% block content %}
+<div class="row g-4">
+<div class="col-lg-6"><div class="card app-card"><div class="card-body">
+<h1 class="h4">Account settings</h1>
+<dl class="row small"><dt class="col-4">Email</dt><dd class="col-8">{{ user.email }} {% if user.is_verified %}<span class="badge text-bg-success">verified</span>{% else %}<span class="badge text-bg-warning">unverified</span>{% endif %}</dd>
+<dt class="col-4">Phone</dt><dd class="col-8">{{ user.masked_phone|default:"—" }}</dd>
+<dt class="col-4">Member since</dt><dd class="col-8">{{ user.date_joined|date:"j M Y" }}</dd></dl>
+<form method="post" novalidate>{% csrf_token %}{% include "includes/form.html" %}<button class="btn btn-primary">Save changes</button></form>
+</div></div></div>
+<div class="col-lg-6"><div class="card app-card"><div class="card-body">
+<h2 class="h5">Security</h2>
+<p class="small">Use a unique password. We will never ask for your M-Pesa PIN.</p>
+<a class="btn btn-outline-light" href="{% url 'accounts:password_change' %}">Change password</a>
+<a class="btn btn-outline-light" href="{% url 'access:status' %}">Access status</a>
+</div></div></div>
+</div>
+{% endblock %}

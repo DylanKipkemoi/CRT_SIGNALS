@@ -1,0 +1,13 @@
+{% load ui %}
+<tr>
+  <td class="mono small">#{{ s.pk }}</td>
+  <td>{{ s.instrument.symbol }}</td>
+  <td><span class="badge {{ s.direction|direction_badge }}">{{ s.direction }}</span>
+    {% if s.is_provisional %}<span class="badge text-bg-secondary">provisional</span>{% endif %}
+    {% if s.is_sample %}<span class="badge text-bg-warning">sample</span>{% endif %}</td>
+  <td class="mono">{{ s.score }}<span class="text-body-secondary">/100</span></td>
+  <td><span class="badge status-{{ s.status }}">{{ s.get_status_display }}</span>{% if s.outcome and s.status == 'closed' %} <small class="text-body-secondary">{{ s.get_outcome_display }}</small>{% endif %}</td>
+  <td class="small">{{ s.created_at|date:"d M H:i" }}</td>
+  <td class="mono small">{% if unlocked %}{{ s.entry_price|price:s.instrument.price_decimals }} / SL {{ s.stop_loss|price:s.instrument.price_decimals }}{% else %}<span class="locked">locked</span>{% endif %}</td>
+  <td class="text-end"><a class="btn btn-sm {% if unlocked %}btn-outline-light{% else %}btn-primary{% endif %}" href="{% url 'signals:detail' s.pk %}">{% if unlocked %}View{% else %}Unlock{% endif %}</a></td>
+</tr>

@@ -1,0 +1,5 @@
+{% if not status %}<span class="badge text-bg-secondary">No data yet</span>
+{% elif status.last_error and status.is_stale %}<span class="badge text-bg-danger" title="{{ status.last_error }}">Feed unavailable</span>
+{% elif not status.is_live %}<span class="badge text-bg-warning">SAMPLE DATA — not live</span>
+{% elif status.is_stale %}<span class="badge text-bg-warning" title="{{ status.stale_reason }}">Stale</span>
+{% else %}<span class="badge text-bg-success">Live</span>{% endif %}

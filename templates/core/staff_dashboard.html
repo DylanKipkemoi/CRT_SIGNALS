@@ -1,0 +1,51 @@
+{% extends "base.html" %}{% block title %}Admin dashboard{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">Admin dashboard</h1>
+  <div class="d-flex gap-2">
+    <form method="post" action="{% url 'staff:manual_scan' %}">{% csrf_token %}<button class="btn btn-warning btn-sm">Run scan now</button></form>
+    <a class="btn btn-outline-light btn-sm" href="{% url 'admin:index' %}">Django admin</a>
+    <a class="btn btn-outline-light btn-sm" href="{% url 'admin:core_siteconfiguration_changelist' %}">Configuration</a>
+  </div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-6 col-md-3"><div class="stat"><div class="stat-v {% if health.healthy %}text-success{% else %}text-warning{% endif %}">{{ health.label }}</div><div class="stat-l">Scanner</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat"><div class="stat-v">{{ users_total }} <small class="fs-6">({{ users_suspended }} suspended)</small></div><div class="stat-l">Users</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat"><div class="stat-v">KSh {{ revenue_today }}</div><div class="stat-l">Confirmed today</div></div></div>
+  <div class="col-6 col-md-3"><div class="stat"><div class="stat-v">{{ config.a_plus_threshold }} / KSh {{ config.daily_fee_kes }}</div><div class="stat-l">A+ threshold / fee</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Data feeds</h2>
+    <table class="table table-sm small mb-0"><thead><tr><th>Symbol</th><th>Provider</th><th>State</th><th>Last OK</th><th>Fails</th></tr></thead><tbody>
+    {% for f in feeds %}<tr><td>{{ f.instrument.symbol }}</td><td>{{ f.provider }}</td><td>{% include "includes/feed_badge.html" with status=f %}</td><td>{{ f.last_success_at|date:"j M H:i"|default:"—" }}</td><td>{{ f.consecutive_failures }}</td></tr>
+    {% if f.last_error %}<tr><td colspan="5" class="text-danger small">{{ f.last_error|truncatechars:200 }}</td></tr>{% endif %}{% empty %}<tr><td colspan="5">No scans yet.</td></tr>{% endfor %}
+    </tbody></table>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Recent scans</h2>
+    <table class="table table-sm small mb-0"><thead><tr><th>Started</th><th>Trigger</th><th>Status</th><th>New</th><th>Upd</th><th>Errors</th></tr></thead><tbody>
+    {% for r in runs %}<tr><td>{{ r.started_at|date:"j M H:i:s" }}</td><td>{{ r.trigger }}</td><td>{{ r.status }}</td><td>{{ r.signals_created }}</td><td>{{ r.signals_updated }}</td><td class="text-danger">{{ r.errors|join:"; "|truncatechars:80 }}</td></tr>{% empty %}<tr><td colspan="6">None</td></tr>{% endfor %}
+    </tbody></table>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Payments today</h2>
+    <p class="small">{% for p in payments_by_status %}<span class="badge pay-{{ p.status }} me-1">{{ p.status }}: {{ p.n }}</span>{% empty %}None today.{% endfor %}</p>
+    <h3 class="h6">Needs review</h3>
+    <ul class="small mb-2">{% for p in review_payments %}<li><a href="{% url 'admin:payments_paymenttransaction_change' p.pk %}">{{ p.reference|truncatechars:13 }}</a> {{ p.user }} — {{ p.review_note }}</li>{% empty %}<li>Nothing flagged.</li>{% endfor %}</ul>
+    <h3 class="h6">Latest callbacks</h3>
+    <ul class="small mb-0">{% for c in callbacks %}<li>{{ c.received_at|date:"j M H:i:s" }} {{ c.checkout_request_id|truncatechars:20 }} — {{ c.outcome }}</li>{% empty %}<li>None</li>{% endfor %}</ul>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Recent signals (incl. sample)</h2>
+    <ul class="small">{% for s in recent_signals %}<li><a href="{% url 'signals:detail' s.pk %}">#{{ s.pk }}</a> {{ s.instrument.symbol }} {{ s.direction }} {{ s.score }}/100 — {{ s.get_status_display }}{% if s.is_sample %} (sample){% endif %}</li>{% empty %}<li>None</li>{% endfor %}</ul>
+    <p class="small mb-0">Totals: {{ stats.total }} published · {{ stats.wins }} TP · {{ stats.losses }} SL · {{ stats.open }} open</p>
+  </div></div></div>
+  <div class="col-12"><div class="card app-card"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Audit log</h2>
+    <div class="table-responsive"><table class="table table-sm small mb-0"><thead><tr><th>Time</th><th>Actor</th><th>Action</th><th>Target</th><th>IP</th></tr></thead><tbody>
+    {% for a in audit %}<tr><td>{{ a.created_at|date:"j M H:i:s" }}</td><td>{{ a.actor|default:"system" }}</td><td>{{ a.action }}</td><td>{{ a.target_type }} {{ a.target_id }}</td><td>{{ a.ip_address|default:"" }}</td></tr>{% endfor %}
+    </tbody></table></div>
+  </div></div></div>
+</div>
+{% endblock %}

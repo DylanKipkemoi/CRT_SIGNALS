@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}A+ BTCUSD &amp; XAUUSD setups{% endblock %}
+{% block content %}
+<section class="hero py-5 mb-4">
+  <div class="row align-items-center g-4">
+    <div class="col-lg-7">
+      <span class="badge rounded-pill text-bg-dark border mb-3">BTCUSD · XAUUSD · 1H Candle Range Theory</span>
+      <h1 class="display-5 fw-bold">Only A+ setups. Otherwise, no trade.</h1>
+      <p class="lead text-body-secondary">The scanner checks completed 1H CRT ranges for liquidity sweeps, then needs a lower-timeframe structure shift, an FVG or order-block entry and good risk/reward. Every factor is scored out of 100. Signals are only published when the score reaches {{ config.a_plus_threshold }}.</p>
+      <div class="d-flex flex-wrap gap-2">
+        {% if user.is_authenticated %}<a class="btn btn-primary btn-lg" href="{% url 'signals:dashboard' %}">Open dashboard</a>
+        {% else %}<a class="btn btn-primary btn-lg" href="{% url 'accounts:register' %}">Create account — first signal free</a>
+        <a class="btn btn-outline-light btn-lg" href="{% url 'markets:overview' %}">Market status</a>{% endif %}
+      </div>
+    </div>
+    <div class="col-lg-5">
+      <div class="card app-card"><div class="card-body">
+        <h2 class="h6 text-uppercase text-body-secondary">Pricing</h2>
+        <ul class="list-unstyled mb-0">
+          <li class="mb-2"><strong>1 free signal</strong> per verified account (one time only)</li>
+          <li class="mb-2"><strong>KSh {{ config.daily_fee_kes }}</strong> unlocks all BTCUSD &amp; XAUUSD signals for that Nairobi day</li>
+          <li>Paid by M-Pesa STK Push. No subscriptions or automatic charges.</li>
+        </ul>
+      </div></div>
+    </div>
+  </div>
+</section>
+<section class="row g-4 mb-5">
+  <div class="col-md-3"><div class="card app-card h-100"><div class="card-body"><h3 class="h6">1 · CRT range</h3><p class="small mb-0">Uses the high, low and midpoint of the last <em>completed</em> 1H candle.</p></div></div></div>
+  <div class="col-md-3"><div class="card app-card h-100"><div class="card-body"><h3 class="h6">2 · Sweep &amp; reclaim</h3><p class="small mb-0">Price must sweep one side and then close back inside the range. A sweep on its own is never treated as a reversal.</p></div></div></div>
+  <div class="col-md-3"><div class="card app-card h-100"><div class="card-body"><h3 class="h6">3 · Confirmation</h3><p class="small mb-0">Needs a lower-timeframe MSS/CHOCH with displacement, plus an FVG or order-block entry in discount/premium.</p></div></div></div>
+  <div class="col-md-3"><div class="card app-card h-100"><div class="card-body"><h3 class="h6">4 · Score &amp; risk</h3><p class="small mb-0">Weighted score out of 100 and a structural stop. Targets point the right way and minimum R:R is enforced.</p></div></div></div>
+</section>
+<section class="mb-4">
+  <h2 class="h4">Published track record</h2>
+  <p class="small text-body-secondary">These figures count every published live signal, not just the ones that worked. Sample/offline signals are left out. A confluence score is not a win probability.</p>
+  {% include "includes/stats.html" %}
+</section>
+{% endblock %}

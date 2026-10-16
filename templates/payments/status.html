@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}Payment status{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-8 col-lg-6">
+<div class="card app-card"><div class="card-body p-4 text-center" id="payment-status" data-url="{% url 'payments:status_api' payment.reference %}" data-final="{{ payment.is_final|yesno:'1,0' }}">
+  <h1 class="h4">M-Pesa payment</h1>
+  <p class="mono small text-body-secondary">Ref {{ payment.reference }} · KSh {{ payment.amount|floatformat:0 }} · {{ payment.phone_masked }}</p>
+  <div class="my-4">
+    <span class="badge fs-6 pay-{{ payment.status }}" data-role="badge">{{ payment.get_status_display }}</span>
+    <p class="small mt-3 mb-0" data-role="desc">{% if payment.is_final %}{{ payment.result_desc }}{% else %}Check your phone and enter your M-Pesa PIN. This page refreshes automatically.{% endif %}</p>
+  </div>
+  <div data-role="success" class="{% if payment.status != 'success' %}d-none{% endif %}"><a class="btn btn-success" href="{% url 'signals:dashboard' %}">Go to today's signals</a></div>
+  <div data-role="retry" class="{% if not payment.is_final or payment.status == 'success' %}d-none{% endif %}"><a class="btn btn-primary" href="{% url 'payments:pay' %}">Try again</a></div>
+  <p class="small text-body-secondary mt-4 mb-0">Access is granted only once Safaricom confirms the payment.</p>
+</div></div>
+</div></div>
+{% endblock %}

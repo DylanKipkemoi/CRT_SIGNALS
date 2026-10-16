@@ -1,0 +1,19 @@
+{% extends "core/_legal.html" %}{% block title %}Privacy Policy{% endblock %}
+{% block legal %}
+<h1>Privacy Policy</h1>
+<p>This policy explains how {{ SITE_NAME }} handles personal data, in line with the Kenya Data Protection Act, 2019.</p>
+<h2 class="h5">Data we collect</h2>
+<ul>
+<li>Account data: full name, email address, Kenyan phone number, hashed password (we never store or see your plain password).</li>
+<li>Payment data: amount, status, M-Pesa receipt and checkout request identifiers, and a masked phone number. We never receive or store your M-Pesa PIN.</li>
+<li>Usage and security data: signals you unlocked, login and payment attempts, IP address in audit logs.</li>
+</ul>
+<h2 class="h5">How we use it</h2>
+<p>To provide the Service, enforce access rules, confirm payments with Safaricom, prevent abuse, and meet legal obligations. We do not sell personal data.</p>
+<h2 class="h5">Sharing</h2>
+<p>Your phone number and the payment amount are sent to Safaricom to start M-Pesa payments. Hosting and email providers process data on our behalf.</p>
+<h2 class="h5">Retention and your rights</h2>
+<p>We keep payment records for as long as financial record-keeping laws require. You may ask to access, correct or delete your data through the <a href="{% url 'core:contact' %}">contact page</a>.</p>
+<h2 class="h5">Security</h2>
+<p>Passwords are hashed with Django's PBKDF2 hasher, connections use HTTPS in production, and secrets are kept outside the codebase.</p>
+{% endblock %}

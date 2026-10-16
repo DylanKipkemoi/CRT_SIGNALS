@@ -1,0 +1,8 @@
+{% extends "base.html" %}{% block title %}Contact{% endblock %}
+{% block content %}
+<div class="row justify-content-center"><div class="col-md-7 col-lg-6">
+<h1 class="h3">Contact us</h1>
+<p class="text-body-secondary">Include your M-Pesa receipt number for payment queries. You can also email {{ CONTACT_EMAIL }}.</p>
+<form method="post" novalidate>{% csrf_token %}{% include "includes/form.html" %}<button class="btn btn-primary">Send message</button></form>
+</div></div>
+{% endblock %}

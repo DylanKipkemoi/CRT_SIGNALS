@@ -1,0 +1,16 @@
+{% extends "base.html" %}{% block title %}Live market overview{% endblock %}
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+  <h1 class="h3 mb-0">Market overview</h1>
+  <span class="small {% if health.healthy %}text-success{% else %}text-warning{% endif %}">Scanner: {{ health.label }}{% if health.last %} · last run {{ health.last.started_at|date:"j M H:i" }} EAT{% endif %}</span>
+</div>
+<div class="row g-3 mb-4">{% for card in cards %}<div class="col-md-6">{% include "includes/instrument_card.html" %}</div>{% empty %}<p>No instruments enabled.</p>{% endfor %}</div>
+<div class="card app-card"><div class="card-body small">
+  <h2 class="h6">About the data</h2>
+  <ul class="mb-0">
+    <li><strong>BTCUSD</strong> comes from public spot exchange data (Coinbase Exchange or Kraken). Volume, trades and order book belong to that one exchange.</li>
+    <li><strong>XAUUSD</strong> is OTC spot gold. Prices come from a broker/aggregator feed (OANDA or Twelve Data). It has no centralized volume or order book: OANDA reports tick volume and Twelve Data reports none. No gold order-flow readings are shown.</li>
+    <li>If a feed is missing, stale or not configured, it is shown as <em>unavailable</em> and no signals are produced from it.</li>
+  </ul>
+</div></div>
+{% endblock %}

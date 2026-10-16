@@ -1,0 +1,84 @@
+{% extends "base.html" %}{% load static ui %}{% block title %}Signal #{{ signal.pk }}{% endblock %}
+{% block content %}
+{% with d=signal.instrument.price_decimals %}
+<div class="d-flex flex-wrap align-items-center gap-2 mb-3">
+  <h1 class="h3 mb-0">{{ signal.instrument.symbol }} <span class="badge {{ signal.direction|direction_badge }}">{{ signal.direction }}</span></h1>
+  <span class="badge status-{{ signal.status }}">{{ signal.get_status_display }}</span>
+  <span class="badge text-bg-dark border">{{ signal.classification }} · {{ signal.score }}/100</span>
+  {% if signal.is_provisional %}<span class="badge text-bg-secondary">Provisional — 1H candle not closed</span>{% endif %}
+  {% if signal.is_sample %}<span class="badge text-bg-warning">Generated from SAMPLE data — not a live signal</span>{% endif %}
+  <span class="small text-body-secondary ms-auto">Created {{ signal.created_at|date:"D j M Y, H:i" }} EAT</span>
+</div>
+{% if not unlocked %}
+<div class="card app-card locked-card mb-4"><div class="card-body text-center py-5">
+  <h2 class="h4">This signal is locked</h2>
+  <p class="text-body-secondary">Entry, stop loss, targets and the full analysis become visible once it is unlocked.</p>
+  <div class="d-flex flex-wrap justify-content-center gap-2">
+  {% if summary.free_remaining > 0 and free_eligible %}
+    <form method="post" action="{% url 'signals:unlock_free' signal.pk %}">{% csrf_token %}
+      <button class="btn btn-success" {% if not summary.verified %}disabled{% endif %} data-confirm="Use your one-time free signal on this setup? This cannot be undone.">Use my free signal</button>
+    </form>
+  {% endif %}
+    <a class="btn btn-primary" href="{% url 'payments:pay' %}">Unlock today's signals — KSh {{ summary.fee }}</a>
+  </div>
+  {% if summary.free_remaining > 0 and not free_eligible %}<p class="small mt-3 mb-0">You can only use the free signal on confirmed A+ signals.</p>{% endif %}
+  {% if not summary.verified %}<p class="small text-warning mt-3 mb-0">Verify your email to use your free signal.</p>{% endif %}
+</div></div>
+{% else %}
+<div class="row g-3 mb-3">
+  <div class="col-lg-4"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Trade plan</h2>
+    <table class="table table-sm mono mb-2">
+      <tr><th>Entry zone</th><td>{{ signal.entry_low|price:d }} – {{ signal.entry_high|price:d }}</td></tr>
+      <tr><th>Entry</th><td>{{ signal.entry_price|price:d }}</td></tr>
+      <tr><th>Stop loss</th><td class="text-bear">{{ signal.stop_loss|price:d }}</td></tr>
+      <tr><th>TP1</th><td class="text-bull">{{ signal.take_profit_1|price:d }} <small>({{ signal.risk_reward_tp1 }}R)</small></td></tr>
+      {% if signal.take_profit_2 %}<tr><th>TP2</th><td class="text-bull">{{ signal.take_profit_2|price:d }}</td></tr>{% endif %}
+      {% if signal.take_profit_3 %}<tr><th>TP3</th><td class="text-bull">{{ signal.take_profit_3|price:d }}</td></tr>{% endif %}
+      <tr><th>R:R (final)</th><td>{{ signal.risk_reward }}</td></tr>
+      <tr><th>Expires</th><td>{{ signal.expires_at|date:"j M H:i" }}</td></tr>
+    </table>
+    {% if signal.status == 'closed' %}<p class="small mb-0">Outcome: <strong>{{ signal.get_outcome_display }}</strong>{% if signal.realized_r is not None %} · {{ signal.realized_r }}R{% endif %}</p>{% endif %}
+  </div></div></div>
+  <div class="col-lg-8"><div class="card app-card h-100"><div class="card-body">
+    <div class="btn-group btn-group-sm mb-2" role="group" aria-label="Timeframe">
+      <button type="button" class="btn btn-outline-light" data-tf="1h">1H</button>
+      <button type="button" class="btn btn-outline-light active" data-tf="15m">15M</button>
+      <button type="button" class="btn btn-outline-light" data-tf="5m">5M</button>
+    </div>
+    <div id="chart" class="chart" data-url="{% url 'signals:chart_data' signal.instrument.symbol %}" data-signal="{{ signal.pk }}" data-tf="15m"></div>
+  </div></div></div>
+</div>
+<div class="row g-3 mb-3">
+  <div class="col-lg-6"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Why this setup</h2>
+    <p class="small"><strong>{{ signal.setup_type }}</strong> · {{ signal.timeframes }}</p>
+    <div class="small explanation">{{ signal.explanation|linebreaks }}</div>
+    <h3 class="h6 mt-3">Invalidation</h3>
+    <div class="small">{{ signal.invalidation_conditions|linebreaks }}</div>
+    <h3 class="h6 mt-3">CRT reference candle</h3>
+    <p class="small mono mb-0">{{ signal.ref_candle_open|date:"j M H:i" }} · H {{ signal.ref_high|price:d }} · L {{ signal.ref_low|price:d }} · Mid {{ signal.ref_mid|price:d }}</p>
+  </div></div></div>
+  <div class="col-lg-6"><div class="card app-card h-100"><div class="card-body">
+    <h2 class="h6 text-uppercase text-body-secondary">Score breakdown ({{ signal.score }}/100)</h2>
+    <p class="small text-body-secondary">This is a confluence score, not a probability of winning.</p>
+    {% for key, f in breakdown.items %}
+    <div class="mb-2">
+      <div class="d-flex justify-content-between small"><span>{{ f.label|default:key }}</span><span class="mono">{{ f.points }}/{{ f.weight }}</span></div>
+      <div class="progress" role="progressbar" aria-valuenow="{{ f.points }}" aria-valuemin="0" aria-valuemax="{{ f.weight }}"><div class="progress-bar" data-width="{% widthratio f.points f.weight 100 %}"></div></div>
+      {% if f.note %}<div class="small text-body-secondary">{{ f.note }}</div>{% endif %}
+    </div>
+    {% endfor %}
+    <h3 class="h6 mt-3">Order flow</h3>
+    <p class="small mb-0">{{ signal.get_order_flow_status_display }}{% if signal.order_flow_details.note %} — {{ signal.order_flow_details.note }}{% endif %}</p>
+    <p class="small text-body-secondary mb-0">Data: {{ signal.provider }} ({{ signal.provider_symbol }})</p>
+  </div></div></div>
+</div>
+<div class="card app-card"><div class="card-body">
+  <h2 class="h6 text-uppercase text-body-secondary">Lifecycle</h2>
+  <ul class="list-unstyled small mb-0">{% for e in events %}<li class="py-1 border-bottom border-secondary-subtle"><span class="mono">{{ e.occurred_at|date:"j M H:i" }}</span> · <strong>{{ e.event_type }}</strong>{% if e.price %} @ {{ e.price|price:d }}{% endif %} {% if e.note %}— {{ e.note }}{% endif %}</li>{% endfor %}</ul>
+</div></div>
+{% endif %}
+{% endwith %}
+{% endblock %}
+{% block scripts %}{% if unlocked %}<script src="{% static 'vendor/lightweight-charts/lightweight-charts.standalone.production.js' %}"></script>{% endif %}{% endblock %}
