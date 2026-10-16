@@ -1,0 +1,6 @@
+{% extends "accounts/_auth.html" %}{% block title %}Log in{% endblock %}
+{% block auth %}
+<h1 class="h4 mb-3">Log in</h1>
+<form method="post" novalidate>{% csrf_token %}{% include "includes/form.html" %}<input type="hidden" name="next" value="{{ next }}"><button class="btn btn-primary w-100">Log in</button></form>
+<div class="d-flex justify-content-between small mt-3"><a href="{% url 'accounts:password_reset' %}">Forgot password?</a><a href="{% url 'accounts:register' %}">Create account</a></div>
+{% endblock %}

@@ -1,0 +1,72 @@
+{% load static %}<!doctype html>
+<html lang="en" data-bs-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ SITE_NAME }}{% endblock %} · {{ SITE_NAME }}</title>
+  <meta name="description" content="Rule-based BTCUSD and XAUUSD setups using 1H Candle Range Theory with ICT/SMC confluence. Trading involves substantial risk.">
+  <link rel="stylesheet" href="{% static 'vendor/bootstrap/bootstrap.min.css' %}">
+  <link rel="stylesheet" href="{% static 'css/app.css' %}">
+</head>
+<body class="d-flex flex-column min-vh-100">
+<nav class="navbar navbar-expand-lg border-bottom sticky-top app-nav">
+  <div class="container">
+    <a class="navbar-brand fw-bold" href="{% url 'core:home' %}"><span class="brand-mark">A+</span> {{ SITE_NAME }}</a>
+    <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#nav" aria-controls="nav" aria-expanded="false" aria-label="Toggle navigation"><span class="navbar-toggler-icon"></span></button>
+    <div class="collapse navbar-collapse" id="nav">
+      <ul class="navbar-nav me-auto">
+        <li class="nav-item"><a class="nav-link" href="{% url 'markets:overview' %}">Markets</a></li>
+        {% if user.is_authenticated %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'signals:dashboard' %}">Dashboard</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'signals:instrument' 'BTCUSD' %}">BTCUSD</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'signals:instrument' 'XAUUSD' %}">XAUUSD</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'access:status' %}">Access</a></li>
+        <li class="nav-item"><a class="nav-link" href="{% url 'payments:history' %}">Payments</a></li>
+        {% if user.is_staff %}<li class="nav-item"><a class="nav-link text-warning" href="{% url 'staff:dashboard' %}">Admin</a></li>{% endif %}
+        {% endif %}
+      </ul>
+      <ul class="navbar-nav">
+        {% if user.is_authenticated %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:profile' %}">{{ user.get_short_name }}</a></li>
+        <li class="nav-item">
+          <form method="post" action="{% url 'accounts:logout' %}" class="d-inline">{% csrf_token %}<button class="btn btn-link nav-link">Log out</button></form>
+        </li>
+        {% else %}
+        <li class="nav-item"><a class="nav-link" href="{% url 'accounts:login' %}">Log in</a></li>
+        <li class="nav-item"><a class="btn btn-primary btn-sm ms-lg-2 mt-1" href="{% url 'accounts:register' %}">Create account</a></li>
+        {% endif %}
+      </ul>
+    </div>
+  </div>
+</nav>
+{% if user.is_authenticated and not user.is_verified %}
+<div class="verify-banner py-2"><div class="container small d-flex flex-wrap gap-2 align-items-center">
+  Verify your email to use your free signal or pay.
+  <form method="post" action="{% url 'accounts:resend_verification' %}">{% csrf_token %}<button class="btn btn-sm btn-outline-warning">Resend verification email</button></form>
+</div></div>
+{% endif %}
+<main class="flex-grow-1 py-4">
+  <div class="container">
+    {% for message in messages %}
+    <div class="alert alert-{% if message.tags == 'error' %}danger{% else %}{{ message.tags }}{% endif %} alert-dismissible fade show" role="alert">
+      {{ message }}<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    {% endfor %}
+    {% block content %}{% endblock %}
+  </div>
+</main>
+<footer class="border-top py-4 small text-body-secondary app-footer">
+  <div class="container">
+    <p class="mb-2"><strong>Risk warning:</strong> Trading BTCUSD and XAUUSD is highly speculative and can result in the loss of all capital. Signals are rule-based analysis, not financial advice, and past results do not guarantee future results. No win rate or profit is promised.</p>
+    <div class="d-flex flex-wrap gap-3">
+      <a href="{% url 'core:terms' %}">Terms</a><a href="{% url 'core:risk' %}">Risk disclosure</a>
+      <a href="{% url 'core:privacy' %}">Privacy</a><a href="{% url 'core:contact' %}">Contact</a>
+      <span class="ms-auto">Times shown in Africa/Nairobi (EAT).</span>
+    </div>
+  </div>
+</footer>
+<script src="{% static 'vendor/bootstrap/bootstrap.bundle.min.js' %}"></script>
+{% block scripts %}{% endblock %}
+<script src="{% static 'js/app.js' %}"></script>
+</body>
+</html>

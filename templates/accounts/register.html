@@ -1,0 +1,7 @@
+{% extends "accounts/_auth.html" %}{% block title %}Create account{% endblock %}
+{% block auth %}
+<h1 class="h4 mb-1">Create your account</h1>
+<p class="small text-body-secondary">Your first qualifying A+ signal is free once you verify your email.</p>
+<form method="post" novalidate>{% csrf_token %}{% include "includes/form.html" %}<button class="btn btn-primary w-100">Create account</button></form>
+<p class="small mt-3 mb-0">Already registered? <a href="{% url 'accounts:login' %}">Log in</a></p>
+{% endblock %}
